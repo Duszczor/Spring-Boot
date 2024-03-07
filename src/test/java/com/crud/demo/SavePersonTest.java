@@ -1,20 +1,35 @@
 package com.crud.demo;
 
-import com.crud.demo.controllers.PersonController;
 import com.crud.demo.services.PersonService;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 
-@AutoConfigureMockMvc
-@WebMvcTest(controllers = PersonController.class)
+//@AutoConfigureMockMvc
+//@WebMvcTest(controllers = PersonController.class)
+@SpringBootTest
+@Testcontainers
+@Sql({"/schema.sql" ,"/data.sql"})
 public class SavePersonTest {
 
     @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
     private PersonService personService;
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> neo4j = new PostgreSQLContainer<>("postgres:11.1");
+
+    @Test
+    void checkLoadData() {
+        var persons = personService.getPersons();
+
+        Assertions.assertFalse(persons.isEmpty());
+    }
+
 }
